@@ -13,7 +13,7 @@ class Bedroom(Scene):
 
         self.paused = False
 
-        self.overlay = pygame.Surface((960, 540))
+        self.overlay = pygame.Surface((960, 540), pygame.SRCALPHA)
         self.overlay.set_alpha(150) # Transparência (0 = invisível, 255 = sólido)
         self.overlay.fill((0, 0, 0)) # Cor preta
         
@@ -35,27 +35,33 @@ class Bedroom(Scene):
         self.interaction_text = None
 
         # zonas de interação
-        self.bed = pygame.Rect(150, 320, 120, 60)
-        self.desk = pygame.Rect(400, 330, 100, 60)
-        self.door = pygame.Rect(850, 280, 60, 120)
+        self.bed = pygame.Rect(0, 320, 300, 60)
+        self.desk = pygame.Rect(400, 330, 250, 60)
+        self.door = pygame.Rect(750, 280, 140, 120)
 
     def handle_event(self, event):
+        # Primeiro checa se foi uma tecla apertada
         if event.type == pygame.KEYDOWN:
-
             # 1. Checa o Pause primeiro (Tecla ESC)
             if event.key == pygame.K_ESCAPE:
                 self.paused = not self.paused
                 return # Impede que o ESC faça outra coisa
-
             # 2. Se estiver pausado, bloqueia qualquer outro input
             if self.paused:
                 return
-
+            
+            # 1. O TAB abre/fecha o celular
             if event.key == pygame.K_TAB:
                 self.show_phone = not self.show_phone
+                return # Para não processar mais nada se acabou de abrir/fechar
 
-            if event.key == pygame.K_e:
-                self.check_interaction()
+            # 2. SE o celular estiver ABERTO, quem manda é ele
+            if self.show_phone:
+                self.phone.handle_event(event) # <--- O SEGREDO TÁ AQUI
+            
+            else:
+                if event.key == pygame.K_e:
+                    self.check_interaction()
 
     def check_interaction(self):
         if self.player.rect.colliderect(self.bed):
@@ -78,9 +84,9 @@ class Bedroom(Scene):
         # quarto escuro
 
         # objetos
-        pygame.draw.rect(screen, (60, 60, 80), self.bed)
-        pygame.draw.rect(screen, (80, 60, 40), self.desk)
-        pygame.draw.rect(screen, (40, 40, 40), self.door)
+        # pygame.draw.rect(screen, (60, 60, 80), self.bed)
+        # pygame.draw.rect(screen, (80, 60, 40), self.desk)
+        # pygame.draw.rect(screen, (40, 40, 40), self.door)
 
         self.player.draw(screen)
 

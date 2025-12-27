@@ -18,7 +18,7 @@ class Player:
     def update(self, dt, keys):
 
         LIMITE_ESQUERDO = 0 # Onde a cama começa
-        LIMITE_DIREITO = 860  # Onde a porta termina
+        LIMITE_DIREITO = 820  # Onde a porta termina
 
         if keys[pygame.K_a] and self.rect.x > LIMITE_ESQUERDO:
             self.facing_right = False
