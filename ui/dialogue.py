@@ -21,7 +21,7 @@ class DialogueBox:
             effect()
 
     def draw(self, screen):
-        BOX_HEIGHT = 110
+        BOX_HEIGHT = 60
         BOX_Y = 540 - BOX_HEIGHT - 10  # quase fora da tela
 
         pygame.draw.rect(

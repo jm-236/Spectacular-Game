@@ -82,19 +82,13 @@ class Bedroom(Scene):
     def draw(self, screen):
         screen.blit(self.background, (0, 0))
         # quarto escuro
-
-        # objetos
-        # pygame.draw.rect(screen, (60, 60, 80), self.bed)
-        # pygame.draw.rect(screen, (80, 60, 40), self.desk)
-        # pygame.draw.rect(screen, (40, 40, 40), self.door)
-
-        self.player.draw(screen)
+        self.player.draw(screen, is_using_phone=self.show_phone)
 
         if self.show_phone:
             self.phone.draw(screen)
         else:
             self.dialogue.draw(screen)
-
+            pass
         if self.paused:
             # Desenha o fundo escuro
             screen.blit(self.overlay, (0, 0))
