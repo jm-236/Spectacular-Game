@@ -10,6 +10,7 @@ class Bedroom(Scene):
         self.player = Player()
         self.phone = Phone()
         self.show_phone = False
+        self.decisao = False
 
         self.paused = False
 
@@ -27,10 +28,7 @@ class Bedroom(Scene):
         )
 
 
-        self.dialogue = DialogueBox(
-            "07:10 AM - Eu nunca estive tão empolgado para o primeiro dia de aula!",
-            []
-        )
+        self.dialogue = DialogueBox()
 
         self.interaction_text = None
 
@@ -59,17 +57,29 @@ class Bedroom(Scene):
             if self.show_phone:
                 self.phone.handle_event(event) # <--- O SEGREDO TÁ AQUI
             
+            if self.decisao:
+                self.dialogue.handle_event(event)
+
             else:
                 if event.key == pygame.K_e:
                     self.check_interaction()
 
     def check_interaction(self):
         if self.player.rect.colliderect(self.bed):
-            self.dialogue.text = "Não posso voltar a dormir, já tá na hora de sair!"
+            pass
         elif self.player.rect.colliderect(self.desk):
-            self.dialogue.text = "Livros, mochila...\nEscola. Lá vamos nós de novo!"
+            pass
         elif self.player.rect.colliderect(self.door):
-            self.dialogue.text = "Hora de ir."
+            # Exemplo dentro do Bedroom.py ao tocar na porta
+            self.dialogue.start_dialogue(
+                text="Peter:\nSe eu sair agora, não volto mais.\nTenho certeza?",
+                choices=[
+                    ("Sim, partiu escola!", lambda: None),
+                    ("Não, esqueci algo.", self.ficar_no_quarto)
+                ],
+                portrait_path="assets/avatars/peter.jpg" # <--- O PULO DO GATO
+            )
+            self.decisao = True
             # futuramente: trocar cena
 
     def update(self, dt):
@@ -102,3 +112,6 @@ class Bedroom(Scene):
             tip_surf = pygame.font.SysFont("arial", 20).render("Pressione ESC para voltar", True, (200, 200, 200))
             tip_rect = tip_surf.get_rect(center=(960/2, 540/2 + 40))
             screen.blit(tip_surf, tip_rect)
+    
+    def ficar_no_quarto(self):
+        self.decisao = False
