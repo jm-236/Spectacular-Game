@@ -19,6 +19,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+        if event.type == pygame.K_p:
+            pass
+
         game.scene.handle_event(event)
 
     game.scene.update(dt)

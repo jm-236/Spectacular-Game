@@ -11,6 +11,14 @@ class Bedroom(Scene):
         self.phone = Phone()
         self.show_phone = False
 
+        self.paused = False
+
+        self.overlay = pygame.Surface((960, 540))
+        self.overlay.set_alpha(150) # Transparência (0 = invisível, 255 = sólido)
+        self.overlay.fill((0, 0, 0)) # Cor preta
+        
+        self.font_pause = pygame.font.SysFont("arial", 40, bold=True)
+
         self.background = pygame.image.load(
             "assets/images/bedroom.png"
         ).convert()
@@ -20,7 +28,7 @@ class Bedroom(Scene):
 
 
         self.dialogue = DialogueBox(
-            "07:10 AM - Mais um dia...",
+            "07:10 AM - Eu nunca estive tão empolgado para o primeiro dia de aula!",
             []
         )
 
@@ -33,6 +41,16 @@ class Bedroom(Scene):
 
     def handle_event(self, event):
         if event.type == pygame.KEYDOWN:
+
+            # 1. Checa o Pause primeiro (Tecla ESC)
+            if event.key == pygame.K_ESCAPE:
+                self.paused = not self.paused
+                return # Impede que o ESC faça outra coisa
+
+            # 2. Se estiver pausado, bloqueia qualquer outro input
+            if self.paused:
+                return
+
             if event.key == pygame.K_TAB:
                 self.show_phone = not self.show_phone
 
@@ -41,14 +59,16 @@ class Bedroom(Scene):
 
     def check_interaction(self):
         if self.player.rect.colliderect(self.bed):
-            self.dialogue.text = "A cama ainda tá quente.\nNão dá pra voltar."
+            self.dialogue.text = "Não posso voltar a dormir, já tá na hora de sair!"
         elif self.player.rect.colliderect(self.desk):
-            self.dialogue.text = "Livros, mochila...\nEscola."
+            self.dialogue.text = "Livros, mochila...\nEscola. Lá vamos nós de novo!"
         elif self.player.rect.colliderect(self.door):
             self.dialogue.text = "Hora de ir."
             # futuramente: trocar cena
 
     def update(self, dt):
+        if self.paused:
+            return
         keys = pygame.key.get_pressed()
         if not self.show_phone:
             self.player.update(dt, keys)
@@ -68,3 +88,17 @@ class Bedroom(Scene):
             self.phone.draw(screen)
         else:
             self.dialogue.draw(screen)
+
+        if self.paused:
+            # Desenha o fundo escuro
+            screen.blit(self.overlay, (0, 0))
+            
+            # Desenha o Texto "PAUSADO" centralizado
+            text_surf = self.font_pause.render("PAUSADO", True, (255, 255, 255))
+            text_rect = text_surf.get_rect(center=(960/2, 540/2))
+            screen.blit(text_surf, text_rect)
+            
+            # (Opcional) Instrução pequena embaixo
+            tip_surf = pygame.font.SysFont("arial", 20).render("Pressione ESC para voltar", True, (200, 200, 200))
+            tip_rect = tip_surf.get_rect(center=(960/2, 540/2 + 40))
+            screen.blit(tip_surf, tip_rect)
