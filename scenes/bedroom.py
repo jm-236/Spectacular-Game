@@ -66,18 +66,49 @@ class Bedroom(Scene):
 
     def check_interaction(self):
         if self.player.rect.colliderect(self.bed):
-            pass
+            self.dialogue.start_sequence(
+                [
+                    {
+                        "text":"Peter:\nCara... mal dormi essa noite.",
+                        "portrait":"assets/avatars/peter.jpg" 
+                    },
+                    {
+                        "text":"Peter:\nMas não vou negar, foi uma noite bem divertida haha!",
+                        "portrait":"assets/avatars/peter.jpg"
+                    }
+                ]
+            )
+            self.decisao = True
+            
         elif self.player.rect.colliderect(self.desk):
-            pass
+            
+            self.dialogue.start_sequence(
+                [
+                    {
+                        "text":"Peter:\nBom... vamos voltar à velha rotina de provas e livros.",
+                        "portrait":"assets/avatars/peter.jpg" 
+                    },
+                    {
+                        "text":"Peter:\nAo menos vou poder testar minha \nnova fórmula de fluido de teia na aula de química!",
+                        "portrait":"assets/avatars/peter.jpg"
+                    }
+                ]
+            )
+            self.decisao = True
+
         elif self.player.rect.colliderect(self.door):
             # Exemplo dentro do Bedroom.py ao tocar na porta
-            self.dialogue.start_dialogue(
-                text="Peter:\nSe eu sair agora, não volto mais.\nTenho certeza?",
-                choices=[
-                    ("Sim, partiu escola!", lambda: None),
-                    ("Não, esqueci algo.", self.ficar_no_quarto)
-                ],
-                portrait_path="assets/avatars/peter.jpg" # <--- O PULO DO GATO
+            self.dialogue.start_sequence(
+                [
+                    {
+                        "text":"Peter:\nAtrasar logo no primeiro dia de aula não é uma ideia muito boa...\nMelhor eu ir logo! ",
+                        "choices":[
+                            ("Sim, partiu escola!", lambda: None),
+                            ("Não, esqueci algo.", self.ficar_no_quarto)
+                        ],
+                        "portrait":"assets/avatars/peter.jpg" 
+                    }
+                ]
             )
             self.decisao = True
             # futuramente: trocar cena
@@ -86,8 +117,11 @@ class Bedroom(Scene):
         if self.paused:
             return
         keys = pygame.key.get_pressed()
-        if not self.show_phone:
+        if not self.show_phone and not self.decisao:
             self.player.update(dt, keys)
+
+        if not self.dialogue.active and self.decisao:
+            self.decisao = False
 
     def draw(self, screen):
         screen.blit(self.background, (0, 0))

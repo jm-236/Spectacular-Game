@@ -2,42 +2,49 @@ import pygame
 
 class DialogueBox:
     def __init__(self):
+        self.font = pygame.font.SysFont("arial", 20)
+        self.active = False
+        self.queue = []  # Lista de diálogos
+        self.current_dialogue = None # Dicionário com a fala atual
+        self.portrait = None
         self.text = ""
         self.choices = []
         self.selected = 0
-        self.font = pygame.font.SysFont("arial", 20)
-        self.active = False
-        
-        # --- NOVO: Suporte a Retrato ---
-        self.portrait = None 
-        self.portrait_side = "left" # "left" para quem fala, "right" para quem ouve (opcional)
 
-    def start_dialogue(self, text, choices=[], portrait_path=None):
-        self.text = text
-        self.choices = choices
-        self.selected = 0
+    def start_sequence(self, dialogue_list):
+        """Recebe uma lista de dicionários com as falas"""
+        self.queue = dialogue_list
         self.active = True
-        
-        # Carrega o retrato se houver
-        if portrait_path:
-            try:
-                img = pygame.image.load(portrait_path).convert_alpha()
-                # Ajuste o tamanho para ficar bonito na caixa (ex: 100x100)
-                self.portrait = pygame.transform.scale(img, (120, 120))
-            except:
+        self.next_dialogue()
+
+    def next_dialogue(self):
+        """Avança para a próxima fala da fila"""
+        if self.queue:
+            # Pega o primeiro item da lista e remove
+            self.current_dialogue = self.queue.pop(0)
+            
+            self.text = self.current_dialogue.get("text", "")
+            self.choices = self.current_dialogue.get("choices", [])
+            self.selected = 0
+            
+            # Carrega retrato
+            portrait_path = self.current_dialogue.get("portrait")
+            if portrait_path:
+                try:
+                    img = pygame.image.load(portrait_path).convert_alpha()
+                    self.portrait = pygame.transform.scale(img, (120, 120))
+                except:
+                    self.portrait = None
+            else:
                 self.portrait = None
         else:
-            self.portrait = None
+            # Se não há mais nada na fila, fecha
+            self.active = False
 
     def handle_event(self, event):
-        if not self.active: return
+        if not self.active or event.type != pygame.KEYDOWN: return
         
-        # (Sua lógica de escolhas continua igual aqui...)
-        if not self.choices and event.key == pygame.K_RETURN:
-            # Se não tem escolha e aperta enter, fecha o dialogo
-            self.active = False
-            return
-
+        # Se houver escolhas, a lógica de seleção continua
         if self.choices:
             if event.key == pygame.K_UP:
                 self.selected = max(0, self.selected - 1)
@@ -45,8 +52,12 @@ class DialogueBox:
                 self.selected = min(len(self.choices)-1, self.selected + 1)
             elif event.key == pygame.K_RETURN:
                 _, effect = self.choices[self.selected]
-                effect()
-                self.active = False # Fecha ao escolher
+                effect() # Executa a função da escolha
+                self.next_dialogue() # Avança após escolher
+        
+        # Se NÃO houver escolhas, Enter apenas passa para o próximo
+        elif event.key == pygame.K_RETURN:
+            self.next_dialogue()
 
     def draw(self, screen):
         if not self.active: return
